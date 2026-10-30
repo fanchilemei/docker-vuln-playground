@@ -1,0 +1,9 @@
+# Lab-only placeholder stack. Bind to localhost. No intentionally exploitable apps yet.
+services:
+  placeholder:
+    build: ./services/placeholder
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: "no"
+    labels:
+      lab.purpose: "localhost-only learning placeholder"
