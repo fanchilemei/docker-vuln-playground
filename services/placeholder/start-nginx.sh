@@ -1,0 +1,10 @@
+#!/bin/sh
+# Create nginx temp directories on the writable tmpfs, then serve the static page.
+set -eu
+mkdir -p \
+  /tmp/nginx/client_temp \
+  /tmp/nginx/proxy_temp \
+  /tmp/nginx/fastcgi_temp \
+  /tmp/nginx/uwsgi_temp \
+  /tmp/nginx/scgi_temp
+exec nginx -g 'daemon off;'

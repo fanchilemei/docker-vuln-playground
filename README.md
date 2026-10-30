@@ -1,47 +1,71 @@
 # docker-vuln-playground
 
-Local Docker playground of **intentionally weak mini-services** for learning how misconfigurations and outdated stacks look from a **defender’s** point of view.
+Local skeleton for **Docker security learning and hardening practice**.
 
-Services are meant to run on **localhost only**. This repo starts as a skeleton; concrete service definitions can be added later.
+The repository name is historical. Everything in this tree is **defensive scaffolding**: a secure-by-default Compose stub, empty service folders, note templates, and checklists. It is not a set of vulnerable applications, and it is not a place to practice attacks.
 
-**Do not** add working exploit code, attack scripts, or public-facing deployments.
+## Explicit ban
 
-## Overview
+Do not add any of the following to this repository:
 
-- Goal: practice recognizing insecure defaults, reading configs, and applying fixes in a disposable lab.
-- Scope: small Docker Compose (or similar) services under your control.
-- Non-goals: CTF challenge packs that teach exploitation chains, remote attack tooling, or cloud-exposed vulnerable hosts.
+- Exploit code, proof-of-concept exploits, payloads, shells, or attack scripts
+- Intentionally vulnerable application source whose purpose is to show how to attack a service
+- Step-by-step reproduction procedures for CVEs or for misconfiguration attacks
+- Scanner configs, wordlists, or other tooling aimed at breaking into this lab or any other system
+- Instructions for exposing the lab on a public IP, a cloud VM, or an open port-forward
 
-## Safety rules (required)
+You may add empty service stubs, Compose examples that follow secure defaults, hardening checklists, and short notes. A note may name a weak setting, state the impact in a sentence or two, and describe the **fix** plus how to confirm it from configuration (`docker compose config`, `docker inspect`, image tag or digest, healthcheck). It must not describe how to attack that setting.
 
-1. **Never expose** these services on a public IP, cloud VM, or open port-forward. Bind to `127.0.0.1` only.
-2. Use an isolated Docker network; tear down stacks when finished (`docker compose down -v`).
-3. Do not point scanners or attack tools at anything outside this lab.
-4. Do not commit real credentials; use obvious lab-only placeholders.
-5. If a service is “vulnerable by design,” document the **misconfiguration and the fix**, not how to exploit it.
+## What to practice
 
-## Suggested structure
+- Read a Compose file for insecure defaults: publishing on all interfaces, `privileged`, host networking, a mounted Docker socket, missing user or capability limits, unpinned images.
+- Apply the secure defaults in `checklists/`.
+- Record what you changed under `notes/`, including the command you used to verify the fix.
+
+## Layout
 
 ```text
-services/      # One folder per mini-service (Dockerfile, compose snippets, config)
-docs/          # Threat model notes, hardening checklists, lesson write-ups
+compose/       How the example Compose file is structured and which defaults it sets
+services/      One folder per service stub (no vulnerable applications)
+notes/         Hardening notes (template in the folder README)
+checklists/    Review lists for a lab session
+docs/          Short safety rules for anyone who clones the repo
+docker-compose.yml   Minimal localhost-only placeholder stack
 ```
 
-Starter note: `services/` and `docs/` will be populated later. Until then, this README is the contract for how new material should be added.
+## Example stack
+
+The root `docker-compose.yml` is a **placeholder stub**. It builds `services/placeholder`, which serves one static HTML page with nginx. That page is not a vulnerable application. The published port is bound to `127.0.0.1` only.
+
+From the repository root:
+
+```bash
+docker compose config
+docker compose up --build
+curl -fsS http://127.0.0.1:8080/
+docker compose down -v
+```
+
+`docker compose config` prints the resolved file so you can review binds and mounts before any container starts. Tear the stack down when you finish, including anonymous volumes (`-v`).
+
+Details of the secure defaults on that file are in `compose/README.md`.
+
+## Safety rules
+
+1. Bind every published port to `127.0.0.1`. Do not publish on `0.0.0.0` or on a routable address.
+2. Keep services on a user-defined bridge network. Do not set `network_mode: host` or `pid: host`.
+3. Do not mount `/var/run/docker.sock` or broad host paths into a service.
+4. Do not commit real credentials. If a stub needs a placeholder value, make it obviously fake and local.
+5. Do not point tools at any system outside this lab.
 
 ## Adding a service later
 
-When you add a service, include:
-
-- What learning objective it serves (e.g. “weak file permissions”, “outdated base image”).
-- Exact localhost ports and bind address.
-- How to start and stop it safely.
-- How to **verify the fix** (config change, image bump, healthcheck)—not an exploit path.
+Follow `services/README.md`. New folders start as documentation stubs. Application files, when you add them, must be ordinary software used to practice configuration — not a target with a known attack path.
 
 ## Disclaimer
 
-Educational and defensive practice only. You are responsible for keeping lab traffic on your machine and for not attacking third-party systems.
+Educational hardening practice on machines you control. You are responsible for keeping lab traffic on your own computer and for not attacking anyone else's systems.
 
 ## License
 
-Add a license when you publish reusable compose files.
+Add a license before treating these Compose files as reusable outside this repository.

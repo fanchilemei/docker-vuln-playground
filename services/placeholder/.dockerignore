@@ -1,0 +1,6 @@
+# Keep notes and local secrets out of the build context.
+README.md
+*.md
+.git
+.env
+.env.*
