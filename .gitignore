@@ -4,3 +4,9 @@
 *.log
 .vscode/
 .idea/
+
+# Personal Compose overrides can loosen binds. Keep them off the remote.
+compose.override.yml
+compose.override.yaml
+docker-compose.override.yml
+docker-compose.override.yaml

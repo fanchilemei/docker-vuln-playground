@@ -1,9 +1,40 @@
-# Lab-only placeholder stack. Bind to localhost. No intentionally exploitable apps yet.
+# Placeholder stack for Docker hardening practice.
+# No vulnerable software is defined here. The only service is a static
+# page used to practice Compose wiring and a localhost bind.
+#
+# Review before start:  docker compose config
+# Start:                docker compose up --build
+# Stop and remove:      docker compose down -v
+
+name: docker-hardening-lab
+
 services:
   placeholder:
-    build: ./services/placeholder
+    build:
+      context: ./services/placeholder
+    image: docker-hardening-lab-placeholder:local
+    # Loopback only. Never publish this port on 0.0.0.0.
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:8080"
     restart: "no"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=16m
+    security_opt:
+      - no-new-privileges:true
+    # Empty capability set: the process is non-root and listens on 8080.
+    cap_drop:
+      - ALL
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.50
+    networks:
+      - lab
     labels:
-      lab.purpose: "localhost-only learning placeholder"
+      lab.purpose: "localhost-only hardening placeholder"
+      lab.vulnerable: "false"
+
+networks:
+  lab:
+    driver: bridge
